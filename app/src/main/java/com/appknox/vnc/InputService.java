@@ -1,18 +1,4 @@
-package net.christianbeier.droidvnc_ng;
-
-/*
- * DroidVNC-NG InputService that binds to the Android a11y API and posts input events sent by the native backend to Android.
- *
- * Its original version was copied from https://github.com/anyvnc/anyvnc/blob/master/apps/ui/android/src/com/anyvnc/AnyVncAccessibilityService.java at
- * f32015d9d29d2d022217f52a99f676ace90cc29e.
- *
- * Original author is Tobias Junghans <tobydox@veyon.io>
- *
- * Licensed under GPL-2.0 as per https://github.com/anyvnc/anyvnc/blob/master/COPYING.
- *
- * Swipe fixes and gesture handling by Christian Beier <info@christianbeier.net>.
- *
- */
+package com.appknox.vnc;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.GestureDescription;
@@ -35,6 +21,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class InputService extends AccessibilityService {
+	static InputWrapperService inputWrapperService;
 
 	/**
 	 * This tracks gesture completion per client.
@@ -56,7 +43,7 @@ public class InputService extends AccessibilityService {
 	/**
 	 * Per-client input context.
 	 */
-	private static class InputContext {
+	static class InputContext {
 		// pointer-related
 		boolean isButtonOneDown;
 		Path path = new Path();
@@ -120,6 +107,7 @@ public class InputService extends AccessibilityService {
 	public void onServiceConnected()
 	{
 		super.onServiceConnected();
+		inputWrapperService = new InputWrapperService();
 		instance = this;
 		isEnabled = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Constants.PREFS_KEY_INPUT_LAST_ENABLED, !new Defaults(this).getViewOnly());
 		scaling = PreferenceManager.getDefaultSharedPreferences(this).getFloat(Constants.PREFS_KEY_SERVER_LAST_SCALING, new Defaults(this).getScaling());
@@ -131,6 +119,7 @@ public class InputService extends AccessibilityService {
 	public void onDestroy() {
 		super.onDestroy();
 		instance = null;
+		inputWrapperService = null;
 		Log.i(TAG, "onDestroy");
 	}
 
@@ -270,13 +259,16 @@ public class InputService extends AccessibilityService {
 		try {
 			InputContext inputContext = instance.mInputContexts.get(client);
 
+			/* processKey(down, keysym); */
+			/* processSystemEvent(down, (int) keysym, inputContext); */
+
+			inputWrapperService.processKey(down, keysym);
+			inputWrapperService.processSystemEvent(down, (int) keysym, inputContext);
+
 			if(inputContext == null) {
 				throw new IllegalStateException("Client " + client + " was not added or is already removed");
 			}
 
-			/*
-				Save states of some keys for combo handling.
-			 */
 			if(keysym == 0xFFE3)
 				inputContext.isKeyCtrlDown = down != 0;
 
@@ -292,50 +284,30 @@ public class InputService extends AccessibilityService {
 			if(keysym == 0xFF1B)
 				inputContext.isKeyEscDown = down != 0;
 
-			/*
-				Ctrl-Alt-Del combo.
-		 	*/
 			if(inputContext.isKeyCtrlDown && inputContext.isKeyAltDown && inputContext.isKeyDelDown) {
 				Log.i(TAG, "onKeyEvent: got Ctrl-Alt-Del");
-				instance.mMainHandler.post(MainService::togglePortraitInLandscapeWorkaround);
+				instance.mMainHandler.post(VNCService::togglePortraitInLandscapeWorkaround);
 			}
 
-			/*
-				Ctrl-Shift-Esc combo.
-		 	*/
 			if(inputContext.isKeyCtrlDown && inputContext.isKeyShiftDown && inputContext.isKeyEscDown) {
 				Log.i(TAG, "onKeyEvent: got Ctrl-Shift-Esc");
 				instance.performGlobalAction(AccessibilityService.GLOBAL_ACTION_RECENTS);
 			}
 
-			/*
-				Home/Pos1
-		 	*/
 			if (keysym == 0xFF50 && down != 0) {
 				Log.i(TAG, "onKeyEvent: got Home/Pos1");
 				instance.performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME);
 			}
 
-			/*
-				End
-			*/
-			if (keysym == 0xFF57 && down != 0) {
-				Log.i(TAG, "onKeyEvent: got End");
-				instance.performGlobalAction(AccessibilityService.GLOBAL_ACTION_POWER_DIALOG);
-			}
-
-			/*
-				Esc
-			 */
 			if(keysym == 0xFF1B && down != 0)  {
 				Log.i(TAG, "onKeyEvent: got Esc");
 				instance.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
 			}
 
 		} catch (Exception e) {
-			// instance probably null
 			Log.e(TAG, "onKeyEvent: failed: " + e);
 		}
+
 	}
 
 	public static void onCutText(String text, long client) {

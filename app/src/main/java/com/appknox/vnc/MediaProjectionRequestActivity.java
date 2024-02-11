@@ -1,29 +1,6 @@
-/*
- * DroidVNC-NG activity for (automatically) requesting media projection
- * permission.
- *
- * Author: Christian Beier <info@christianbeier.net>
- *
- * Copyright (C) 2020 Kitchen Armor.
- *
- * You can redistribute and/or modify this program under the terms of the
- * GNU General Public License version 2 as published by the Free Software
- * Foundation.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 59 Temple Place Suite 330, Boston, MA 02111-1307, USA.
- */
-
-package net.christianbeier.droidvnc_ng;
+package com.appknox.vnc;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.preference.PreferenceManager;
 
 import android.app.Activity;
 import android.content.Context;
@@ -60,11 +37,10 @@ public class MediaProjectionRequestActivity extends AppCompatActivity {
             else
                 Log.i(TAG, "User acknowledged");
 
-            Intent intent = new Intent(this, MainService.class);
-            intent.setAction(MainService.ACTION_HANDLE_MEDIA_PROJECTION_RESULT);
-            intent.putExtra(MainService.EXTRA_ACCESS_KEY, PreferenceManager.getDefaultSharedPreferences(this).getString(Constants.PREFS_KEY_SETTINGS_ACCESS_KEY, new Defaults(this).getAccessKey()));
-            intent.putExtra(MainService.EXTRA_MEDIA_PROJECTION_RESULT_CODE, resultCode);
-            intent.putExtra(MainService.EXTRA_MEDIA_PROJECTION_RESULT_DATA, data);
+            Intent intent = new Intent(this, VNCService.class);
+            intent.setAction(VNCService.ACTION_HANDLE_MEDIA_PROJECTION_RESULT);
+            intent.putExtra(VNCService.EXTRA_MEDIA_PROJECTION_RESULT_CODE, resultCode);
+            intent.putExtra(VNCService.EXTRA_MEDIA_PROJECTION_RESULT_DATA, data);
             startService(intent);
             finish();
         }

@@ -1,25 +1,4 @@
-/*
- * DroidVNC-NG main activity.
- *
- * Author: Christian Beier <info@christianbeier.net
- *
- * Copyright (C) 2020 Kitchen Armor.
- *
- * You can redistribute and/or modify this program under the terms of the
- * GNU General Public License version 2 as published by the Free Software
- * Foundation.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 59 Temple Place Suite 330, Boston, MA 02111-1307, USA.
- */
-
-package net.christianbeier.droidvnc_ng;
+package com.appknox.vnc;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -30,14 +9,12 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
 import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceManager;
 
-import android.provider.Settings;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -95,19 +72,18 @@ public class MainActivity extends AppCompatActivity {
         mButtonToggle = findViewById(R.id.toggle);
         mButtonToggle.setOnClickListener(view -> {
 
-            Intent intent = new Intent(MainActivity.this, MainService.class);
-            intent.putExtra(MainService.EXTRA_PORT, prefs.getInt(Constants.PREFS_KEY_SETTINGS_PORT, mDefaults.getPort()));
-            intent.putExtra(MainService.EXTRA_PASSWORD, prefs.getString(Constants.PREFS_KEY_SETTINGS_PASSWORD, mDefaults.getPassword()));
-            intent.putExtra(MainService.EXTRA_FILE_TRANSFER, prefs.getBoolean(Constants.PREFS_KEY_SETTINGS_FILE_TRANSFER, mDefaults.getFileTransfer()));
-            intent.putExtra(MainService.EXTRA_VIEW_ONLY, prefs.getBoolean(Constants.PREFS_KEY_SETTINGS_VIEW_ONLY, mDefaults.getViewOnly()));
-            intent.putExtra(MainService.EXTRA_SHOW_POINTERS, prefs.getBoolean(Constants.PREFS_KEY_SETTINGS_SHOW_POINTERS, mDefaults.getShowPointers()));
-            intent.putExtra(MainService.EXTRA_SCALING, prefs.getFloat(Constants.PREFS_KEY_SETTINGS_SCALING, mDefaults.getScaling()));
-            intent.putExtra(MainService.EXTRA_ACCESS_KEY, prefs.getString(Constants.PREFS_KEY_SETTINGS_ACCESS_KEY, mDefaults.getAccessKey()));
+            Intent intent = new Intent(MainActivity.this, VNCService.class);
+            intent.putExtra(VNCService.EXTRA_PORT, prefs.getInt(Constants.PREFS_KEY_SETTINGS_PORT, mDefaults.getPort()));
+            intent.putExtra(VNCService.EXTRA_PASSWORD, prefs.getString(Constants.PREFS_KEY_SETTINGS_PASSWORD, mDefaults.getPassword()));
+            intent.putExtra(VNCService.EXTRA_FILE_TRANSFER, prefs.getBoolean(Constants.PREFS_KEY_SETTINGS_FILE_TRANSFER, mDefaults.getFileTransfer()));
+            intent.putExtra(VNCService.EXTRA_VIEW_ONLY, prefs.getBoolean(Constants.PREFS_KEY_SETTINGS_VIEW_ONLY, mDefaults.getViewOnly()));
+            intent.putExtra(VNCService.EXTRA_SHOW_POINTERS, prefs.getBoolean(Constants.PREFS_KEY_SETTINGS_SHOW_POINTERS, mDefaults.getShowPointers()));
+            intent.putExtra(VNCService.EXTRA_SCALING, prefs.getFloat(Constants.PREFS_KEY_SETTINGS_SCALING, mDefaults.getScaling()));
             if(mIsMainServiceRunning) {
-                intent.setAction(MainService.ACTION_STOP);
+                intent.setAction(VNCService.ACTION_STOP);
             }
             else {
-                intent.setAction(MainService.ACTION_START);
+                intent.setAction(VNCService.ACTION_START);
             }
             mButtonToggle.setEnabled(false);
 
@@ -164,12 +140,11 @@ public class MainActivity extends AppCompatActivity {
                         mLastMainServiceRequestId = UUID.randomUUID().toString();
                         mLastReverseHost = host;
                         mLastReversePort = port;
-                        Intent request = new Intent(MainActivity.this, MainService.class);
-                        request.putExtra(MainService.EXTRA_ACCESS_KEY, prefs.getString(Constants.PREFS_KEY_SETTINGS_ACCESS_KEY, mDefaults.getAccessKey()));
-                        request.setAction(MainService.ACTION_CONNECT_REVERSE);
-                        request.putExtra(MainService.EXTRA_HOST, host);
-                        request.putExtra(MainService.EXTRA_PORT, port);
-                        request.putExtra(MainService.EXTRA_REQUEST_ID, mLastMainServiceRequestId);
+                        Intent request = new Intent(MainActivity.this, VNCService.class);
+                        request.setAction(VNCService.ACTION_CONNECT_REVERSE);
+                        request.putExtra(VNCService.EXTRA_HOST, host);
+                        request.putExtra(VNCService.EXTRA_PORT, port);
+                        request.putExtra(VNCService.EXTRA_REQUEST_ID, mLastMainServiceRequestId);
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             startForegroundService(request);
                         } else {
@@ -249,13 +224,12 @@ public class MainActivity extends AppCompatActivity {
                         mLastRepeaterHost = host;
                         mLastRepeaterPort = port;
                         mLastRepeaterId = repeaterId;
-                        Intent request = new Intent(MainActivity.this, MainService.class);
-                        request.putExtra(MainService.EXTRA_ACCESS_KEY, prefs.getString(Constants.PREFS_KEY_SETTINGS_ACCESS_KEY, mDefaults.getAccessKey()));
-                        request.setAction(MainService.ACTION_CONNECT_REPEATER);
-                        request.putExtra(MainService.EXTRA_HOST, host);
-                        request.putExtra(MainService.EXTRA_PORT, port);
-                        request.putExtra(MainService.EXTRA_REPEATER_ID, repeaterId);
-                        request.putExtra(MainService.EXTRA_REQUEST_ID, mLastMainServiceRequestId);
+                        Intent request = new Intent(MainActivity.this, VNCService.class);
+                        request.setAction(VNCService.ACTION_CONNECT_REPEATER);
+                        request.putExtra(VNCService.EXTRA_HOST, host);
+                        request.putExtra(VNCService.EXTRA_PORT, port);
+                        request.putExtra(VNCService.EXTRA_REPEATER_ID, repeaterId);
+                        request.putExtra(VNCService.EXTRA_REQUEST_ID, mLastMainServiceRequestId);
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             startForegroundService(request);
                         } else {
@@ -488,19 +462,19 @@ public class MainActivity extends AppCompatActivity {
         });
 
         TextView about = findViewById(R.id.about);
-        about.setText(getString(R.string.main_activity_about, BuildConfig.VERSION_NAME));
+        // about.setText(getString(R.string.main_activity_about, BuildConfig.VERSION_NAME));
 
         mMainServiceBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (MainService.ACTION_START.equals(intent.getAction())) {
-                    if(intent.getBooleanExtra(MainService.EXTRA_REQUEST_SUCCESS, false)) {
-                        // was a successful START requested by anyone (but sent by MainService, as the receiver is not exported!)
-                        Log.d(TAG, "got MainService started success event");
+                if (VNCService.ACTION_START.equals(intent.getAction())) {
+                    if(intent.getBooleanExtra(VNCService.EXTRA_REQUEST_SUCCESS, false)) {
+                        // was a successful START requested by anyone (but sent by VNCService, as the receiver is not exported!)
+                        Log.d(TAG, "got VNCService started success event");
                         onServerStarted();
                     } else {
-                        // was a failed START requested by anyone (but sent by MainService, as the receiver is not exported!)
-                        Log.d(TAG, "got MainService started fail event");
+                        // was a failed START requested by anyone (but sent by VNCService, as the receiver is not exported!)
+                        Log.d(TAG, "got VNCService started fail event");
                         // if it was, by us, re-enable the button!
                         mButtonToggle.setEnabled(true);
                         // let focus stay on button
@@ -508,19 +482,19 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
-                if (MainService.ACTION_STOP.equals(intent.getAction())
-                        && (intent.getBooleanExtra(MainService.EXTRA_REQUEST_SUCCESS, true))) {
-                    // was a successful STOP requested by anyone (but sent by MainService, as the receiver is not exported!)
+                if (VNCService.ACTION_STOP.equals(intent.getAction())
+                        && (intent.getBooleanExtra(VNCService.EXTRA_REQUEST_SUCCESS, true))) {
+                    // was a successful STOP requested by anyone (but sent by VNCService, as the receiver is not exported!)
                     // or a STOP without any extras
-                    Log.d(TAG, "got MainService stopped event");
+                    Log.d(TAG, "got VNCService stopped event");
                     onServerStopped();
                 }
 
-                if (MainService.ACTION_CONNECT_REVERSE.equals(intent.getAction())
+                if (VNCService.ACTION_CONNECT_REVERSE.equals(intent.getAction())
                         && mLastMainServiceRequestId != null
-                        && mLastMainServiceRequestId.equals(intent.getStringExtra(MainService.EXTRA_REQUEST_ID))) {
+                        && mLastMainServiceRequestId.equals(intent.getStringExtra(VNCService.EXTRA_REQUEST_ID))) {
                     // was a CONNECT_REVERSE requested by us
-                    if (intent.getBooleanExtra(MainService.EXTRA_REQUEST_SUCCESS, false)) {
+                    if (intent.getBooleanExtra(VNCService.EXTRA_REQUEST_SUCCESS, false)) {
                         Toast.makeText(MainActivity.this,
                                         getString(R.string.main_activity_reverse_vnc_success,
                                                 mLastReverseHost,
@@ -547,11 +521,11 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
-                if (MainService.ACTION_CONNECT_REPEATER.equals(intent.getAction())
+                if (VNCService.ACTION_CONNECT_REPEATER.equals(intent.getAction())
                         && mLastMainServiceRequestId != null
-                        && mLastMainServiceRequestId.equals(intent.getStringExtra(MainService.EXTRA_REQUEST_ID))) {
+                        && mLastMainServiceRequestId.equals(intent.getStringExtra(VNCService.EXTRA_REQUEST_ID))) {
                     // was a CONNECT_REPEATER requested by us
-                    if (intent.getBooleanExtra(MainService.EXTRA_REQUEST_SUCCESS, false)) {
+                    if (intent.getBooleanExtra(VNCService.EXTRA_REQUEST_SUCCESS, false)) {
                         Toast.makeText(MainActivity.this,
                                         getString(R.string.main_activity_repeater_vnc_success,
                                                 mLastRepeaterHost,
@@ -586,18 +560,18 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         IntentFilter filter = new IntentFilter();
-        filter.addAction(MainService.ACTION_START);
-        filter.addAction(MainService.ACTION_STOP);
-        filter.addAction(MainService.ACTION_CONNECT_REVERSE);
-        filter.addAction(MainService.ACTION_CONNECT_REPEATER);
-        // register the receiver as NOT_EXPORTED so it only receives broadcasts sent by MainService,
+        filter.addAction(VNCService.ACTION_START);
+        filter.addAction(VNCService.ACTION_STOP);
+        filter.addAction(VNCService.ACTION_CONNECT_REVERSE);
+        filter.addAction(VNCService.ACTION_CONNECT_REPEATER);
+        // register the receiver as NOT_EXPORTED so it only receives broadcasts sent by VNCService,
         // not a malicious fake broadcaster like
-        // `adb shell am broadcast -a net.christianbeier.droidvnc_ng.ACTION_STOP --ez net.christianbeier.droidvnc_ng.EXTRA_REQUEST_SUCCESS true`
+        // `adb shell am broadcast -a net.christianbeier.com.appknox.knoxvnc.ACTION_STOP --ez net.christianbeier.com.appknox.knoxvnc.EXTRA_REQUEST_SUCCESS true`
         // for instance
         ContextCompat.registerReceiver(this, mMainServiceBroadcastReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED);
 
         // setup UI initial state
-        if (MainService.isServerActive()) {
+        if (VNCService.isServerActive()) {
             Log.d(TAG, "Found server to be started");
             onServerStarted();
         } else {
@@ -640,41 +614,19 @@ public class MainActivity extends AppCompatActivity {
             findViewById(R.id.permission_row_file_access).setVisibility(View.GONE);
         }
 
-
-        /*
-            Update Notification permission display. Only show on >= Android 13.
-         */
-        if(Build.VERSION.SDK_INT >= 33) {
-            TextView notificationStatus = findViewById(R.id.permission_status_notification);
-            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-                notificationStatus.setText(R.string.main_activity_granted);
-                notificationStatus.setTextColor(getColor(R.color.granted));
-            } else {
-                notificationStatus.setText(R.string.main_activity_denied);
-                notificationStatus.setTextColor(getColor(R.color.denied));
-            }
-            notificationStatus.setOnClickListener(view -> {
-                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + getPackageName()));
-                startActivity(intent);
-            });
-        } else {
-            findViewById(R.id.permission_row_notification).setVisibility(View.GONE);
-        }
-
-
         /*
            Update Screen Capturing permission display.
         */
         TextView screenCapturingStatus = findViewById(R.id.permission_status_screen_capturing);
-        if(MainService.isMediaProjectionEnabled() == 1) {
+        if(VNCService.isMediaProjectionEnabled() == 1) {
             screenCapturingStatus.setText(R.string.main_activity_granted);
             screenCapturingStatus.setTextColor(getColor(R.color.granted));
         }
-        if(MainService.isMediaProjectionEnabled() == 0) {
+        if(VNCService.isMediaProjectionEnabled() == 0) {
             screenCapturingStatus.setText(R.string.main_activity_denied);
             screenCapturingStatus.setTextColor(getColor(R.color.denied));
         }
-        if(MainService.isMediaProjectionEnabled() == -1) {
+        if(VNCService.isMediaProjectionEnabled() == -1) {
             screenCapturingStatus.setText(R.string.main_activity_unknown);
             screenCapturingStatus.setTextColor(getColor(android.R.color.darker_gray));
         }
@@ -696,12 +648,12 @@ public class MainActivity extends AppCompatActivity {
             mButtonToggle.requestFocus();
         });
 
-        if(MainService.getPort() >= 0) {
+        if(VNCService.getPort() >= 0) {
             // uhh there must be a nice functional way for this
-            ArrayList<String> hosts = MainService.getIPv4s();
+            ArrayList<String> hosts = VNCService.getIPv4s();
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < hosts.size(); ++i) {
-                sb.append(hosts.get(i) + ":" + MainService.getPort());
+                sb.append(hosts.get(i) + ":" + VNCService.getPort());
                 if (i != hosts.size() - 1)
                     sb.append(" ").append(getString(R.string.or)).append(" ");
             }

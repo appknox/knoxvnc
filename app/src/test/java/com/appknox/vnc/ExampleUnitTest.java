@@ -1,4 +1,4 @@
-package net.christianbeier.droidvnc_ng;
+package com.appknox.vnc;
 
 import org.junit.Test;
 

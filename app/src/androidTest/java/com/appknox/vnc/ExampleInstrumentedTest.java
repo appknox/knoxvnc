@@ -1,4 +1,4 @@
-package net.christianbeier.droidvnc_ng;
+package com.appknox.vnc;
 
 import android.content.Context;
 
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
     public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("net.christianbeier.droidvnc_ng", appContext.getPackageName());
+        assertEquals("com.appknox.vnc", appContext.getPackageName());
     }
 }

@@ -1,25 +1,4 @@
-/*
- * DroidVNC-NG main service.
- *
- * Author: Christian Beier <info@christianbeier.net>
- *
- * Copyright (C) 2020 Kitchen Armor.
- *
- * You can redistribute and/or modify this program under the terms of the
- * GNU General Public License version 2 as published by the Free Software
- * Foundation.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 59 Temple Place Suite 330, Boston, MA 02111-1307, USA.
- */
-
-package net.christianbeier.droidvnc_ng;
+package com.appknox.vnc;
 
 import android.annotation.SuppressLint;
 import android.app.Notification;
@@ -53,6 +32,8 @@ import android.view.Display;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
+import com.appknox.vnc.Defaults;
+
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -60,28 +41,27 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
-public class MainService extends Service {
+public class VNCService extends Service {
 
-    private static final String TAG = "MainService";
+    private static final String TAG = "VNCService";
     private static final int NOTIFICATION_ID = 11;
-    public final static String ACTION_START = "net.christianbeier.droidvnc_ng.ACTION_START";
-    public final static String ACTION_STOP = "net.christianbeier.droidvnc_ng.ACTION_STOP";
-    public static final String ACTION_CONNECT_REVERSE = "net.christianbeier.droidvnc_ng.ACTION_CONNECT_REVERSE";
-    public static final String ACTION_CONNECT_REPEATER = "net.christianbeier.droidvnc_ng.ACTION_CONNECT_REPEATER";
-    public static final String EXTRA_REQUEST_ID = "net.christianbeier.droidvnc_ng.EXTRA_REQUEST_ID";
-    public static final String EXTRA_REQUEST_SUCCESS = "net.christianbeier.droidvnc_ng.EXTRA_REQUEST_SUCCESS";
-    public static final String EXTRA_HOST = "net.christianbeier.droidvnc_ng.EXTRA_HOST";
-    public static final String EXTRA_PORT = "net.christianbeier.droidvnc_ng.EXTRA_PORT";
-    public static final String EXTRA_REPEATER_ID = "net.christianbeier.droidvnc_ng.EXTRA_REPEATER_ID";
-    public static final String EXTRA_ACCESS_KEY = "net.christianbeier.droidvnc_ng.EXTRA_ACCESS_KEY";
-    public static final String EXTRA_PASSWORD = "net.christianbeier.droidvnc_ng.EXTRA_PASSWORD";
-    public static final String EXTRA_VIEW_ONLY = "net.christianbeier.droidvnc_ng.EXTRA_VIEW_ONLY";
-    public static final String EXTRA_SHOW_POINTERS = "net.christianbeier.droidvnc_ng.EXTRA_SHOW_POINTERS";
-    public static final String EXTRA_SCALING = "net.christianbeier.droidvnc_ng.EXTRA_SCALING";
+    public final static String ACTION_START = "com.appknox.vnc.ACTION_START";
+    public final static String ACTION_STOP = "com.appknox.vnc.ACTION_STOP";
+    public static final String ACTION_CONNECT_REVERSE = "com.appknox.vnc.ACTION_CONNECT_REVERSE";
+    public static final String ACTION_CONNECT_REPEATER = "com.appknox.vnc.ACTION_CONNECT_REPEATER";
+    public static final String EXTRA_REQUEST_ID = "com.appknox.vnc.EXTRA_REQUEST_ID";
+    public static final String EXTRA_REQUEST_SUCCESS = "com.appknox.vnc.EXTRA_REQUEST_SUCCESS";
+    public static final String EXTRA_HOST = "com.appknox.vnc.EXTRA_HOST";
+    public static final String EXTRA_PORT = "com.appknox.vnc.EXTRA_PORT";
+    public static final String EXTRA_REPEATER_ID = "com.appknox.vnc.EXTRA_REPEATER_ID";
+    public static final String EXTRA_PASSWORD = "com.appknox.vnc.EXTRA_PASSWORD";
+    public static final String EXTRA_VIEW_ONLY = "com.appknox.vnc.EXTRA_VIEW_ONLY";
+    public static final String EXTRA_SHOW_POINTERS = "com.appknox.vnc.EXTRA_SHOW_POINTERS";
+    public static final String EXTRA_SCALING = "com.appknox.vnc.EXTRA_SCALING";
     /**
      * Only used on Android 12 and earlier.
      */
-    public static final String EXTRA_FILE_TRANSFER = "net.christianbeier.droidvnc_ng.EXTRA_FILE_TRANSFER";
+    public static final String EXTRA_FILE_TRANSFER = "com.appknox.vnc.EXTRA_FILE_TRANSFER";
 
     final static String ACTION_HANDLE_MEDIA_PROJECTION_RESULT = "action_handle_media_projection_result";
     final static String EXTRA_MEDIA_PROJECTION_RESULT_DATA = "result_data_media_projection";
@@ -120,7 +100,7 @@ public class MainService extends Service {
 
     private Defaults mDefaults;
 
-    private static MainService instance;
+    private static VNCService instance;
 
     private final NsdManager.RegistrationListener mNSDRegistrationListener = new NsdManager.RegistrationListener() {
         @Override
@@ -146,7 +126,7 @@ public class MainService extends Service {
 
     static {
         // order is important here
-        System.loadLibrary("droidvnc-ng");
+        System.loadLibrary("vnc");
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
@@ -251,17 +231,6 @@ public class MainService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
-        String accessKey = intent.getStringExtra(EXTRA_ACCESS_KEY);
-        if (accessKey == null
-                || accessKey.isEmpty()
-                || !accessKey.equals(PreferenceManager.getDefaultSharedPreferences(this).getString(Constants.PREFS_KEY_SETTINGS_ACCESS_KEY, mDefaults.getAccessKey()))) {
-            Log.e(TAG, "Access key missing or incorrect");
-            if(!vncIsActive()) {
-                stopSelfByUs();
-            }
-            return START_NOT_STICKY;
-        }
-
         if(ACTION_HANDLE_MEDIA_PROJECTION_RESULT.equals(intent.getAction())) {
             Log.d(TAG, "onStartCommand: handle media projection result");
             // Step 4 (optional): coming back from capturing permission check, now starting capturing machinery
@@ -815,11 +784,10 @@ public class MainService extends Service {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, getPackageName())
                 .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle(getString(R.string.app_name))
-                .setContentText(text)
+                .setContentTitle("Devicefarm")
+                .setContentText("Running Device Services in Foreground")
                 .setSilent(isSilent)
-                .setOngoing(true)
-                .setContentIntent(pendingIntent);
+                .setOngoing(true);
         if (Build.VERSION.SDK_INT >= 31) {
             builder.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE);
         }
@@ -827,22 +795,6 @@ public class MainService extends Service {
     }
 
     private void updateNotification() {
-        int port = PreferenceManager.getDefaultSharedPreferences(this).getInt(PREFS_KEY_SERVER_LAST_PORT, mDefaults.getPort());
-        if (port < 0) {
-            ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE))
-                    .notify(NOTIFICATION_ID,
-                            getNotification(getString(R.string.main_service_notification_not_listening),
-                                    false));
-        } else {
-            ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE))
-                    .notify(NOTIFICATION_ID,
-                            getNotification(getResources().getQuantityString(
-                                            R.plurals.main_service_notification_listening,
-                                            mNumberOfClients,
-                                            port,
-                                            mNumberOfClients),
-                                    false));
-        }
     }
 
 }

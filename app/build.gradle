@@ -8,18 +8,16 @@ android {
     compileSdkVersion 34
 
     defaultConfig {
-        applicationId "net.christianbeier.droidvnc_ng"
+        applicationId "com.appknox.vnc"
         minSdkVersion 24
         targetSdkVersion 33
         versionCode 29
         versionName "2.2.0"
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
         externalNativeBuild {
             cmake {
                 // specify explicit target list to exclude examples, tests, utils. etc from used libraries
-                targets "turbojpeg-static", "vncserver", "droidvnc-ng"
+                targets "turbojpeg-static", "vncserver", "vnc"
             }
         }
 
@@ -42,7 +40,7 @@ android {
             path 'src/main/cpp/CMakeLists.txt'
         }
     }
-    namespace 'net.christianbeier.droidvnc_ng'
+    namespace 'com.appknox.vnc'
     // needed for Gradle 8.x w/ Kotlin 1.8.x
     kotlinOptions {
         jvmTarget = '1.8'

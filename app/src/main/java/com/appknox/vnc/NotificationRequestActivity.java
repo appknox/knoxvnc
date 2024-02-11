@@ -1,5 +1,4 @@
-
-package net.christianbeier.droidvnc_ng;
+package com.appknox.vnc;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -73,9 +72,8 @@ public class NotificationRequestActivity extends AppCompatActivity {
         else
             Log.i(TAG, "permission denied");
 
-        Intent intent = new Intent(this, MainService.class);
-        intent.setAction(MainService.ACTION_HANDLE_NOTIFICATION_RESULT);
-        intent.putExtra(MainService.EXTRA_ACCESS_KEY, PreferenceManager.getDefaultSharedPreferences(this).getString(Constants.PREFS_KEY_SETTINGS_ACCESS_KEY, new Defaults(this).getAccessKey()));
+        Intent intent = new Intent(this, VNCService.class);
+        intent.setAction(VNCService.ACTION_HANDLE_NOTIFICATION_RESULT);
         startService(intent);
         finish();
     }
