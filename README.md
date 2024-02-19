@@ -1,7 +1,7 @@
 # KnoxVNC
 
 This is an Android VNC server using contemporary Android 5+ APIs. It therefore does not require
-root access.
+root access. Forked from https://github.com/bk138/droidVNC-NG
 
 ## How to use
 
@@ -25,7 +25,7 @@ root access.
 adb shell am start-foreground-service \
  -n com.appknox.vnc/.VNCService \
  -a com.appknox.vnc.ACTION_START \
- --ei com.appknox.vnc.EXTRA_PORT 5900 \
+ --ei com.appknox.vnc.EXTRA_PORT 5900
 ```
 
 ##### Stop Server
@@ -33,7 +33,7 @@ adb shell am start-foreground-service \
 ```shell
  adb shell am start-foreground-service \
  -n com.appknox.vnc/.VNCService \
- -a com.appknox.vnc.ACTION_STOP \
+ -a com.appknox.vnc.ACTION_STOP
 ```
 
 ## Building
