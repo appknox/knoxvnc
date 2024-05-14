@@ -50,8 +50,8 @@ jobs:
         uses: lukka/get-cmake@latest
       - name: Build with Gradle (Release)
         env:
-          KEYSTORE_BASE64: secrets.KEYSTORE_BASE64
-          KEYSTORE_PASSWORD: secrets.KEYSTORE_PASSWORD
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         run: |
           echo $KEYSTORE_BASE64 | base64 --decode > release.keystore
           ./gradlew clean && ./gradlew assembleRelease
