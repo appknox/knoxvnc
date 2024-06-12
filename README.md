@@ -10,7 +10,7 @@ root access. Forked from https://github.com/bk138/droidVNC-NG
 3. Set a good password and consider turning the `Start on Boot` off.
 4. Connect to your local Wi-Fi. For accepting a connection your device should be connected to some Local Area Network that you can control, normally it is a router. Connections via data networks (i.e. your mobile provider) are not supported.
 5. Click `Start` and connect to your device.
-6. If keyboard is required, please provide root/SU access to the application via a root solution (Magisk, KernelSU etc).
+6. If keyboard is required, please provide root/SU access to the application via a root solution (Magisk, KernelSU etc). If **Progisk** is being used, add KnoxVNC to the `Superuser Isolation` as an exemption for granting root access.
 
 ### Keyboard Shortcuts From a VNC Viewer
 
