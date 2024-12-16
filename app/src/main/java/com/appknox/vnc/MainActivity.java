@@ -73,6 +73,9 @@ public class MainActivity extends AppCompatActivity {
         mButtonToggle.setOnClickListener(view -> {
 
             Intent intent = new Intent(MainActivity.this, VNCService.class);
+            Intent i = new Intent("com.appknox.vnc.BootReceiver");
+            i.setClass(getApplicationContext(), BootReceiver.class);
+
             intent.putExtra(VNCService.EXTRA_PORT, prefs.getInt(Constants.PREFS_KEY_SETTINGS_PORT, mDefaults.getPort()));
             intent.putExtra(VNCService.EXTRA_PASSWORD, prefs.getString(Constants.PREFS_KEY_SETTINGS_PASSWORD, mDefaults.getPassword()));
             intent.putExtra(VNCService.EXTRA_FILE_TRANSFER, prefs.getBoolean(Constants.PREFS_KEY_SETTINGS_FILE_TRANSFER, mDefaults.getFileTransfer()));
@@ -94,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
         });
+
 
         mAddress = findViewById(R.id.address);
 
@@ -629,6 +633,31 @@ public class MainActivity extends AppCompatActivity {
         if(VNCService.isMediaProjectionEnabled() == -1) {
             screenCapturingStatus.setText(R.string.main_activity_unknown);
             screenCapturingStatus.setTextColor(getColor(android.R.color.darker_gray));
+        }
+
+
+        if (Build.VERSION.SDK_INT >= 30) {
+            TextView startOnBootStatus = findViewById(R.id.permission_status_start_on_boot);
+            if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Constants.PREFS_KEY_SETTINGS_START_ON_BOOT, mDefaults.getStartOnBoot())
+                    && InputService.isConnected()) {
+                startOnBootStatus.setText(R.string.main_activity_granted);
+                startOnBootStatus.setTextColor(getColor(R.color.granted));
+            } else {
+                startOnBootStatus.setText(R.string.main_activity_denied);
+                startOnBootStatus.setTextColor(getColor(R.color.denied));
+                // wire this up only for denied status
+                startOnBootStatus.setOnClickListener(view -> {
+                    if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Constants.PREFS_KEY_SETTINGS_START_ON_BOOT, mDefaults.getStartOnBoot()))
+                    {
+                        Intent inputRequestIntent = new Intent(this, InputRequestActivity.class);
+                        inputRequestIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        inputRequestIntent.putExtra(InputRequestActivity.EXTRA_DO_NOT_START_MAIN_SERVICE_ON_FINISH, true);
+                        startActivity(inputRequestIntent);
+                    }
+                });
+            }
+        } else {
+            findViewById(R.id.permission_row_start_on_boot).setVisibility(View.GONE);
         }
 
     }
