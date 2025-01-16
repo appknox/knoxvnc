@@ -73,12 +73,15 @@ public class VNCService extends Service {
     final static String ACTION_HANDLE_WRITE_STORAGE_RESULT = "action_handle_write_storage_result";
     final static String EXTRA_WRITE_STORAGE_RESULT = "result_write_storage";
 
+    public static final String EXTRA_FALLBACK_SCREEN_CAPTURE = "com.appknox.vnc.EXTRA_FALLBACK_SCREEN_CAPTURE";
+
     final static String ACTION_HANDLE_NOTIFICATION_RESULT = "action_handle_notification_result";
 
     private static final String PREFS_KEY_SERVER_LAST_PORT = "server_last_port" ;
     private static final String PREFS_KEY_SERVER_LAST_PASSWORD = "server_last_password" ;
     private static final String PREFS_KEY_SERVER_LAST_FILE_TRANSFER = "server_last_file_transfer" ;
     private static final String PREFS_KEY_SERVER_LAST_SHOW_POINTERS = "server_last_show_pointers" ;
+    private static final String PREFS_KEY_SERVER_LAST_FALLBACK_SCREEN_CAPTURE = "server_last_fallback_screen_capture";
     private static final String PREFS_KEY_SERVER_LAST_START_REQUEST_ID = "server_last_start_request_id" ;
 
     private int mResultCode;
@@ -286,7 +289,8 @@ public class VNCService extends Service {
                 // or ask for capturing permission first (then going in step 4)
             }
 
-            if (mResultCode != 0 && mResultData != null) {
+            if (mResultCode != 0 && mResultData != null
+                    || (Build.VERSION.SDK_INT >= 30 && PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PREFS_KEY_SERVER_LAST_FALLBACK_SCREEN_CAPTURE, false))) {
                 DisplayMetrics displayMetrics = getDisplayMetrics(Display.DEFAULT_DISPLAY);
                 int port = PreferenceManager.getDefaultSharedPreferences(this).getInt(PREFS_KEY_SERVER_LAST_PORT, mDefaults.getPort());
                 String name = Settings.Secure.getString(getContentResolver(), "bluetooth_name");
@@ -368,6 +372,7 @@ public class VNCService extends Service {
             ed.putBoolean(PREFS_KEY_SERVER_LAST_SHOW_POINTERS,
                     !intent.getBooleanExtra(EXTRA_VIEW_ONLY, prefs.getBoolean(Constants.PREFS_KEY_SETTINGS_VIEW_ONLY, mDefaults.getViewOnly()))
                             && intent.getBooleanExtra(EXTRA_SHOW_POINTERS, prefs.getBoolean(Constants.PREFS_KEY_SETTINGS_SHOW_POINTERS, mDefaults.getShowPointers())));
+            ed.putBoolean(PREFS_KEY_SERVER_LAST_FALLBACK_SCREEN_CAPTURE, intent.getBooleanExtra(EXTRA_FALLBACK_SCREEN_CAPTURE, false));
             ed.apply();
             // also set new value for InputService
             InputService.scaling = intent.getFloatExtra(EXTRA_SCALING, mDefaults.getScaling());
