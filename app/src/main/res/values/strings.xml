@@ -38,6 +38,11 @@
     <string name="main_activity_special_key_reference">From a VNC viewer, <b>Ctrl-Shift-Esc</b> triggers \'Recent Apps\' overview, <b>Home/Pos1</b> acts as Home button, <b>Escape</b> acts as Back button.</string>
     <string name="main_activity_about">This is KnoxVNC-NG %1$s. Please note that more features are still being added to KnoxVNC. In particular, most keyboard strokes as of now can only be input via the Android soft keyboard, there is only limited support for keyboard events from VNC viewers (yet). Please report any issues and feature requests at https://github.com/bk138/droidVNC-NG/issues</string>
     <string name="main_service_notification_not_listening">Not listening for incoming connections</string>
+    <string name="main_activity_start_on_boot" translatable="false">Start on Boot</string>
+    <string name="main_activity_fallback" translatable="false">fallback</string>
+    <string name="input_a11y_msg_input" translatable="false">To be able to remotely control your device, you need to enable accessibility for droidVNC-NG. Do you want to enable accessibility now?</string>
+    <string name="input_a11y_msg_boot" translatable="false">To enable start on boot for droidVNC-NG, you need to enable accessibility for it. Do you want to enable accessibility now?</string>
+    <string name="input_a11y_msg_input_and_boot" translatable="false">To be able to remotely control your device and to enable start on boot for droidVNC-NG, you need to enable accessibility for it. Do you want to enable accessibility now?</string>
     <plurals name="main_service_notification_listening">
         <item quantity="one">Listening on port %1$d, %2$d client connected</item>
         <item quantity="other">Listening on port %1$d, %2$d clients connected</item>
