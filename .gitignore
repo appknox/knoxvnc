@@ -12,3 +12,10 @@
 /captures
 .externalNativeBuild
 .cxx
+
+# build artifacts / signing keys (should never be tracked)
+*.o
+*.apk
+*.apk.zip
+*.keystore
+*.jks
