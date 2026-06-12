@@ -18,6 +18,8 @@ import android.media.Image;
 import android.media.ImageReader;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
+import android.os.Handler;
+import android.os.Looper;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Build;
@@ -493,6 +495,16 @@ public class VNCService extends Service {
         if(mMediaProjection == null)
             try {
                 mMediaProjection = mMediaProjectionManager.getMediaProjection(mResultCode, mResultData);
+                if (mMediaProjection != null) {
+                    // API 34+ (targetSdk 34+) requires a registered callback before
+                    // createVirtualDisplay(), otherwise it throws IllegalStateException.
+                    mMediaProjection.registerCallback(new MediaProjection.Callback() {
+                        @Override
+                        public void onStop() {
+                            Log.w(TAG, "MediaProjection stopped");
+                        }
+                    }, new Handler(Looper.getMainLooper()));
+                }
             } catch (SecurityException e) {
                 Log.w(TAG, "startScreenCapture: got SecurityException, re-requesting confirmation");
                 // This initiates a prompt dialog for the user to confirm screen projection.
